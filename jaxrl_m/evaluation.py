@@ -1,6 +1,9 @@
 from typing import Dict
 import jax
-import gym
+try:
+    import gym
+except ImportError:
+    import gymnasium as gym
 import numpy as np
 from collections import defaultdict
 import time
