@@ -9,6 +9,7 @@ from jaxrl_m.vision.vit import vit_configs
 
 from jaxrl_m.vision import data_augmentations
 from jaxrl_m.vision.preprocess import PreprocessEncoder, BasicPreprocessEncoder
+from jaxrl_m.vision.tdmpc2_simple_conv import tdmpc2_simple_conv_configs
 
 encoders = dict()
 encoders.update(impala_configs)
@@ -19,3 +20,4 @@ encoders.update(small_configs)
 
 encoders.update(mae_model_configs)
 encoders.update(vit_configs)
+encoders.update(tdmpc2_simple_conv_configs) 
