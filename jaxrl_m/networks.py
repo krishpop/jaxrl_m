@@ -196,6 +196,26 @@ class WithEncoder(nn.Module):
         return self.network(latents, *args, **kwargs)
 
 
+class ConcatenateWithEncoders(nn.Module):
+    encoders: Tuple[nn.Module, ...]  # Tuple of encoder modules
+    network: nn.Module
+
+    def __call__(self, observations, *args, **kwargs):
+        # Concatenate latent embeddings from all encoders
+        latents = [get_latent(encoder, observations) for encoder in self.encoders]
+        concatenated_latents = jnp.concatenate(latents, axis=-1)
+        return self.network(concatenated_latents, *args, **kwargs)
+
+
+class WithMappedEncoders(nn.Module):
+    encoders: Dict[str, nn.Module]
+    network: nn.Module
+
+    def __call__(self, observations, *args, **kwargs):
+        latents = {key: get_latent(encoder, observations) for key, encoder in self.encoders.items()}
+        return self.network(latents, *args, **kwargs)
+
+
 class ActorCritic(nn.Module):
     """Combines FC networks with encoders for actor, critic, and value.
 
