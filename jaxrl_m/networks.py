@@ -209,11 +209,22 @@ class ConcatenateWithEncoders(nn.Module):
 
 class WithMappedEncoders(nn.Module):
     encoders: Dict[str, nn.Module]
-    network: nn.Module
+    concatenate_keys: Tuple[str] = None
+    network: Optional[nn.Module] = None
 
     def __call__(self, observations, *args, **kwargs):
+        # Compute latents for each encoder
         latents = {key: get_latent(encoder, observations[key]) for key, encoder in self.encoders.items()}
-        return self.network(latents, *args, **kwargs)
+        
+        # Concatenate latents in the specified order
+        concatenated_latents = jnp.concatenate([latents[key] for key in self.concatenate_keys], axis=-1)
+        
+        # If a network is defined, pass the concatenated latents through it
+        if self.network is not None:
+            return self.network(concatenated_latents, *args, **kwargs)
+        
+        # Otherwise, return the concatenated latents
+        return concatenated_latents
 
 
 class ActorCritic(nn.Module):
