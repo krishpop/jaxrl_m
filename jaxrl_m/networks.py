@@ -212,7 +212,7 @@ class WithMappedEncoders(nn.Module):
     network: nn.Module
 
     def __call__(self, observations, *args, **kwargs):
-        latents = {key: get_latent(encoder, observations) for key, encoder in self.encoders.items()}
+        latents = {key: get_latent(encoder, observations[key]) for key, encoder in self.encoders.items()}
         return self.network(latents, *args, **kwargs)
 
 

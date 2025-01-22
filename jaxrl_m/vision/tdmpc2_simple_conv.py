@@ -3,6 +3,7 @@ import jax.numpy as jnp
 from flax import linen as nn
 from typing import Optional, Callable
 
+from jaxrl_m.vision.data_augmentations import random_crop
 from flax.linen import Module
 
 class ShiftAug(Module):
@@ -54,10 +55,9 @@ class TDMPC2SimpleConv(nn.Module):
     def __call__(self, x: jnp.ndarray, rng: Optional[jax.random.PRNGKey] = None) -> jnp.ndarray:
         # If shift augmentation is requested and rng is provided
         if self.apply_shift_aug and rng is not None:
-            x = ShiftAug(pad=3)(x, rng)
+            x = random_crop(x, rng, padding=3)
 
-        # Pixel preprocessing: normalize to [-0.5, 0.5]
-        x = x / 255.0 - 0.5
+        x -= 0.5  # Normalize to [-0.5, 0.5] from [0, 1]
 
         # Conv layers
         x = nn.Conv(features=self.num_channels, kernel_size=(7, 7), strides=(2, 2))(x)
