@@ -1,0 +1,21 @@
+name: lerobot
+dependencies:
+  - python=3.10
+  - conda-forge::pinocchio
+  - pip:
+    - jax[tpu] -f https://storage.googleapis.com/jax-releases/libtpu_releases.html
+    - mujoco==2.3.2
+    - huggingface-hub==0.24.7
+    - pybullet==3.2.6 --no-deps
+    - scalax
+    - torch~=2.5.0
+    - torch_xla[tpu]~=2.5.0 -f https://storage.googleapis.com/libtpu-releases/index.html -f https://storage.googleapis.com/libtpu-wheels/index.html
+    - flax
+    - optax
+    - ml-collections
+    - diffusers
+    - distrax
+    - gin-config
+    - gym==0.21.0
+variables:
+  PYTHONPATH: /home/krishnan/multi_task_experts/external/d3il

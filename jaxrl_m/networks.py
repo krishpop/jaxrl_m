@@ -14,6 +14,8 @@ This file contains nn.Module definitions for common networks used in RL. It is d
 
 from jaxrl_m.typing import *
 
+import functools
+import jax
 import flax.linen as nn
 import jax.numpy as jnp
 
@@ -178,7 +180,7 @@ def get_latent(
     if encoder is None:
         return observations
 
-    elif isinstance(observations, dict):
+    elif isinstance(observations, dict) and not isinstance(encoder, WithMappedEncoders):
         return jnp.concatenate(
             [encoder(observations["image"]), observations["state"]], axis=-1
         )
@@ -200,7 +202,8 @@ class ConcatenateWithEncoders(nn.Module):
     encoders: Tuple[nn.Module, ...]  # Tuple of encoder modules
     network: nn.Module
 
-    def __call__(self, observations, *args, **kwargs):
+    @nn.compact
+    def __call__(self, observations: Data, *args, **kwargs):
         # Concatenate latent embeddings from all encoders
         latents = [get_latent(encoder, observations) for encoder in self.encoders]
         concatenated_latents = jnp.concatenate(latents, axis=-1)
@@ -212,9 +215,10 @@ class WithMappedEncoders(nn.Module):
     concatenate_keys: Tuple[str] = None
     network: Optional[nn.Module] = None
 
-    def __call__(self, observations, *args, **kwargs):
+    @nn.compact
+    def __call__(self, observations: Data, *args, **kwargs):
         # Compute latents for each encoder
-        latents = {key: get_latent(encoder, observations[key]) for key, encoder in self.encoders.items()}
+        latents = {key: get_latent(self.encoders[key], observations[key]) for key in self.concatenate_keys}
         
         # Concatenate latents in the specified order
         concatenated_latents = jnp.concatenate([latents[key] for key in self.concatenate_keys], axis=-1)

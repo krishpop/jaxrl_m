@@ -1,9 +1,7 @@
 from typing import Dict
 import jax
-try:
-    import gym
-except ImportError:
-    import gymnasium as gym
+import gym
+import gymnasium
 import numpy as np
 from collections import defaultdict
 import time
@@ -64,14 +62,23 @@ def evaluate(policy_fn, env: gym.Env, num_episodes: int) -> Dict[str, float]:
 
     """
     stats = defaultdict(list)
+    is_gymnasium_env = isinstance(env, gymnasium.Env)
     for _ in range(num_episodes):
-        observation, done = env.reset(), False
+        done = False
+        if is_gymnasium_env:
+            observation, info = env.reset()
+        else:
+            observation = env.reset()
         while not done:
             action = policy_fn(observation)
-            observation, _, done, info = env.step(action)
+            if is_gymnasium_env:
+                observation, reward, truncated, info, done = env.step(action)
+                done = done or truncated
+            else:
+                observation, reward, done, info = env.step(action)
             add_to(stats, flatten(info))
         add_to(stats, flatten(info, parent_key="final"))
-
+    
     for k, v in stats.items():
         stats[k] = np.mean(v)
     return stats
