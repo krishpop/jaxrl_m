@@ -72,7 +72,7 @@ def evaluate(policy_fn, env: gym.Env, num_episodes: int) -> Dict[str, float]:
         while not done:
             action = policy_fn(observation)
             if is_gymnasium_env:
-                observation, reward, truncated, info, done = env.step(action)
+                observation, reward, truncated, done, info = env.step(action)
                 done = done or truncated
             else:
                 observation, reward, done, info = env.step(action)
